@@ -379,10 +379,376 @@ async def estimate_quote(body: QuoteCreate):
     return calculate_quote(body)
 
 
+class PublicQuoteCreate(QuoteCreate):
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: Optional[str] = None
+
+
+@api_router.post("/quotes/public", response_model=Quote)
+async def create_public_quote(body: PublicQuoteCreate):
+    """Unauthenticated quote submission from the public website."""
+    pricing = calculate_quote(body)
+    quote_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": "guest",
+        "user_name": body.contact_name,
+        "user_email": body.contact_email.lower(),
+        "user_phone": body.contact_phone,
+        "event_type": body.event_type,
+        "guest_count": body.guest_count,
+        "event_date": body.event_date,
+        "location": body.location,
+        "cuisines": body.cuisines,
+        "services": body.services,
+        "live_counters": body.live_counters,
+        "needs_staff": body.needs_staff,
+        "needs_decor": body.needs_decor,
+        "notes": body.notes,
+        "estimated_total": pricing["total"],
+        "estimated_per_plate": pricing["per_plate"],
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.quotes.insert_one(quote_doc)
+    return Quote(**quote_doc)
+
+
 @api_router.get("/quotes/my", response_model=List[Quote])
 async def my_quotes(current_user: dict = Depends(get_current_user)):
     items = await db.quotes.find({"user_id": current_user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return items
+
+
+# ----------- Inquiries (Contact Form) -----------
+class InquiryCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    subject: Optional[str] = None
+    message: str
+
+
+class Inquiry(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    subject: Optional[str] = None
+    message: str
+    status: str = "new"  # new | replied | resolved
+    reply: Optional[str] = None
+    created_at: str
+
+
+@api_router.post("/inquiries", response_model=Inquiry)
+async def submit_inquiry(body: InquiryCreate):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": body.name,
+        "email": body.email.lower(),
+        "phone": body.phone,
+        "subject": body.subject,
+        "message": body.message,
+        "status": "new",
+        "reply": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.inquiries.insert_one(doc)
+    return Inquiry(**doc)
+
+
+# ----------- Admin Dependency -----------
+async def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+
+# ----------- Admin: Dashboard Stats -----------
+@api_router.get("/admin/stats")
+async def admin_stats(_: dict = Depends(require_admin)):
+    total_quotes = await db.quotes.count_documents({})
+    pending_quotes = await db.quotes.count_documents({"status": "pending"})
+    customers = await db.users.count_documents({"role": "customer"})
+    menu_count = await db.menu_items.count_documents({})
+    portfolio_count = await db.portfolio.count_documents({})
+    new_inquiries = await db.inquiries.count_documents({"status": "new"})
+    # Sum of estimated_total
+    agg = await db.quotes.aggregate([
+        {"$group": {"_id": None, "total": {"$sum": "$estimated_total"}}}
+    ]).to_list(1)
+    total_value = agg[0]["total"] if agg else 0
+    return {
+        "total_quotes": total_quotes,
+        "pending_quotes": pending_quotes,
+        "customers": customers,
+        "menu_items": menu_count,
+        "portfolio_items": portfolio_count,
+        "new_inquiries": new_inquiries,
+        "total_pipeline_value": total_value,
+    }
+
+
+# ----------- Admin: Quotes -----------
+class QuoteStatusUpdate(BaseModel):
+    status: str  # pending | contacted | confirmed | cancelled
+
+
+@api_router.get("/admin/quotes", response_model=List[Quote])
+async def admin_list_quotes(status_filter: Optional[str] = None, _: dict = Depends(require_admin)):
+    q = {}
+    if status_filter:
+        q["status"] = status_filter
+    items = await db.quotes.find(q, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return items
+
+
+@api_router.put("/admin/quotes/{quote_id}", response_model=Quote)
+async def admin_update_quote_status(quote_id: str, body: QuoteStatusUpdate, _: dict = Depends(require_admin)):
+    res = await db.quotes.update_one({"id": quote_id}, {"$set": {"status": body.status}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    doc = await db.quotes.find_one({"id": quote_id}, {"_id": 0})
+    return doc
+
+
+@api_router.delete("/admin/quotes/{quote_id}")
+async def admin_delete_quote(quote_id: str, _: dict = Depends(require_admin)):
+    res = await db.quotes.delete_one({"id": quote_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    return {"deleted": True}
+
+
+# ----------- Admin: Inquiries -----------
+class InquiryUpdate(BaseModel):
+    status: Optional[str] = None
+    reply: Optional[str] = None
+
+
+@api_router.get("/admin/inquiries", response_model=List[Inquiry])
+async def admin_list_inquiries(_: dict = Depends(require_admin)):
+    items = await db.inquiries.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return items
+
+
+@api_router.put("/admin/inquiries/{inq_id}", response_model=Inquiry)
+async def admin_update_inquiry(inq_id: str, body: InquiryUpdate, _: dict = Depends(require_admin)):
+    update = {k: v for k, v in body.dict().items() if v is not None}
+    if update:
+        await db.inquiries.update_one({"id": inq_id}, {"$set": update})
+    doc = await db.inquiries.find_one({"id": inq_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Inquiry not found")
+    return doc
+
+
+@api_router.delete("/admin/inquiries/{inq_id}")
+async def admin_delete_inquiry(inq_id: str, _: dict = Depends(require_admin)):
+    await db.inquiries.delete_one({"id": inq_id})
+    return {"deleted": True}
+
+
+# ----------- Admin: Generic CRUD helpers -----------
+def _new_id() -> str:
+    return str(uuid.uuid4())
+
+
+class MenuItemUpsert(BaseModel):
+    name: str
+    category: str
+    description: str = ""
+    price_min: int
+    price_max: int
+    spice_level: int = 0
+    is_jain: bool = False
+    is_live_counter: bool = False
+    image: Optional[str] = None
+
+
+@api_router.post("/admin/menu", response_model=MenuItem)
+async def admin_create_menu(body: MenuItemUpsert, _: dict = Depends(require_admin)):
+    doc = body.dict()
+    doc["id"] = _new_id()
+    await db.menu_items.insert_one(doc)
+    doc.pop("_id", None)
+    return MenuItem(**doc)
+
+
+@api_router.put("/admin/menu/{item_id}", response_model=MenuItem)
+async def admin_update_menu(item_id: str, body: MenuItemUpsert, _: dict = Depends(require_admin)):
+    await db.menu_items.update_one({"id": item_id}, {"$set": body.dict()})
+    doc = await db.menu_items.find_one({"id": item_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Menu item not found")
+    return doc
+
+
+@api_router.delete("/admin/menu/{item_id}")
+async def admin_delete_menu(item_id: str, _: dict = Depends(require_admin)):
+    await db.menu_items.delete_one({"id": item_id})
+    return {"deleted": True}
+
+
+class ServiceUpsert(BaseModel):
+    title: str
+    description: str
+    starting_price: int
+    icon: str = "restaurant"
+    image: Optional[str] = None
+    features: List[str] = []
+
+
+@api_router.post("/admin/services", response_model=Service)
+async def admin_create_service(body: ServiceUpsert, _: dict = Depends(require_admin)):
+    doc = body.dict()
+    doc["id"] = _new_id()
+    await db.services.insert_one(doc)
+    doc.pop("_id", None)
+    return Service(**doc)
+
+
+@api_router.put("/admin/services/{sid}", response_model=Service)
+async def admin_update_service(sid: str, body: ServiceUpsert, _: dict = Depends(require_admin)):
+    await db.services.update_one({"id": sid}, {"$set": body.dict()})
+    doc = await db.services.find_one({"id": sid}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return doc
+
+
+@api_router.delete("/admin/services/{sid}")
+async def admin_delete_service(sid: str, _: dict = Depends(require_admin)):
+    await db.services.delete_one({"id": sid})
+    return {"deleted": True}
+
+
+class PortfolioUpsert(BaseModel):
+    title: str
+    event_type: str
+    guest_count: int
+    cuisine: str
+    image: str
+    description: str
+
+
+@api_router.post("/admin/portfolio", response_model=PortfolioItem)
+async def admin_create_portfolio(body: PortfolioUpsert, _: dict = Depends(require_admin)):
+    doc = body.dict()
+    doc["id"] = _new_id()
+    await db.portfolio.insert_one(doc)
+    doc.pop("_id", None)
+    return PortfolioItem(**doc)
+
+
+@api_router.put("/admin/portfolio/{pid}", response_model=PortfolioItem)
+async def admin_update_portfolio(pid: str, body: PortfolioUpsert, _: dict = Depends(require_admin)):
+    await db.portfolio.update_one({"id": pid}, {"$set": body.dict()})
+    doc = await db.portfolio.find_one({"id": pid}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Portfolio item not found")
+    return doc
+
+
+@api_router.delete("/admin/portfolio/{pid}")
+async def admin_delete_portfolio(pid: str, _: dict = Depends(require_admin)):
+    await db.portfolio.delete_one({"id": pid})
+    return {"deleted": True}
+
+
+class TestimonialUpsert(BaseModel):
+    name: str
+    role: str
+    rating: int = 5
+    text: str
+    event_type: str
+
+
+@api_router.post("/admin/testimonials", response_model=Testimonial)
+async def admin_create_testimonial(body: TestimonialUpsert, _: dict = Depends(require_admin)):
+    doc = body.dict()
+    doc["id"] = _new_id()
+    await db.testimonials.insert_one(doc)
+    doc.pop("_id", None)
+    return Testimonial(**doc)
+
+
+@api_router.put("/admin/testimonials/{tid}", response_model=Testimonial)
+async def admin_update_testimonial(tid: str, body: TestimonialUpsert, _: dict = Depends(require_admin)):
+    await db.testimonials.update_one({"id": tid}, {"$set": body.dict()})
+    doc = await db.testimonials.find_one({"id": tid}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Testimonial not found")
+    return doc
+
+
+@api_router.delete("/admin/testimonials/{tid}")
+async def admin_delete_testimonial(tid: str, _: dict = Depends(require_admin)):
+    await db.testimonials.delete_one({"id": tid})
+    return {"deleted": True}
+
+
+class ClientUpsert(BaseModel):
+    name: str
+    logo: str
+
+
+@api_router.post("/admin/corporate-clients", response_model=CorporateClient)
+async def admin_create_client(body: ClientUpsert, _: dict = Depends(require_admin)):
+    doc = body.dict()
+    doc["id"] = _new_id()
+    await db.corporate_clients.insert_one(doc)
+    doc.pop("_id", None)
+    return CorporateClient(**doc)
+
+
+@api_router.put("/admin/corporate-clients/{cid}", response_model=CorporateClient)
+async def admin_update_client(cid: str, body: ClientUpsert, _: dict = Depends(require_admin)):
+    await db.corporate_clients.update_one({"id": cid}, {"$set": body.dict()})
+    doc = await db.corporate_clients.find_one({"id": cid}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return doc
+
+
+@api_router.delete("/admin/corporate-clients/{cid}")
+async def admin_delete_client(cid: str, _: dict = Depends(require_admin)):
+    await db.corporate_clients.delete_one({"id": cid})
+    return {"deleted": True}
+
+
+# ----------- Admin: Media Upload -----------
+class MediaUpload(BaseModel):
+    data_url: str  # data:image/...;base64,...
+    label: Optional[str] = None
+
+
+@api_router.post("/admin/media")
+async def upload_media(body: MediaUpload, current_admin: dict = Depends(require_admin)):
+    if not body.data_url.startswith("data:"):
+        raise HTTPException(status_code=400, detail="Must be a data URL")
+    # Soft size guard ~ 2MB base64
+    if len(body.data_url) > 3_000_000:
+        raise HTTPException(status_code=413, detail="Image too large (max ~2MB)")
+    mid = _new_id()
+    await db.media.insert_one({
+        "id": mid,
+        "data_url": body.data_url,
+        "label": body.label,
+        "uploaded_by": current_admin["id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    # Return both the id and the data_url so the client can use it directly
+    return {"id": mid, "url": body.data_url, "label": body.label}
+
+
+@api_router.get("/media/{media_id}")
+async def get_media(media_id: str):
+    doc = await db.media.find_one({"id": media_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Media not found")
+    return {"id": doc["id"], "url": doc["data_url"], "label": doc.get("label")}
 
 
 @api_router.get("/")

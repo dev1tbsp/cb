@@ -15,6 +15,7 @@ import { useRouter, Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
+import { api as apiClient } from '@/src/api/client';
 import { theme, BUSINESS } from '@/src/theme';
 
 export default function LoginScreen() {
@@ -34,7 +35,9 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email.trim().toLowerCase(), password);
-      router.replace('/home');
+      const me = await apiClient.get('/auth/me');
+      if (me?.role === 'admin') router.replace('/admin');
+      else router.replace('/home');
     } catch (e: any) {
       setError(e?.message || 'Login failed');
     } finally {

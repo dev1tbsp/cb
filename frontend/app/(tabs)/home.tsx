@@ -11,6 +11,7 @@ import {
   Dimensions,
   FlatList,
   Platform,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -269,6 +270,9 @@ export default function Home() {
           </View>
         </Section>
 
+        {/* Contact Form */}
+        <ContactForm />
+
         {/* Contact CTA */}
         <View style={styles.contactBlock}>
           <Text style={styles.contactLabel}>Ready when you are</Text>
@@ -290,6 +294,119 @@ export default function Home() {
     </SafeAreaView>
   );
 }
+
+function ContactForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const submit = async () => {
+    if (!name || !email || !message) return;
+    setSending(true);
+    try {
+      await api.post('/inquiries', { name, email, phone: phone || null, subject: subject || null, message }, { auth: false });
+      setSent(true);
+      setName(''); setEmail(''); setPhone(''); setSubject(''); setMessage('');
+    } catch {
+      // ignore
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <View style={contactStyles.section}>
+      <View style={contactStyles.head}>
+        <Text style={contactStyles.label}>Have a question?</Text>
+        <Text style={contactStyles.title}>Send us a message</Text>
+      </View>
+      <View style={contactStyles.form}>
+        {sent ? (
+          <View style={contactStyles.sentBox}>
+            <Ionicons name="checkmark-circle" size={28} color={theme.colors.success} />
+            <Text style={contactStyles.sentText}>Thanks! We'll be in touch soon.</Text>
+            <TouchableOpacity onPress={() => setSent(false)}>
+              <Text style={contactStyles.sentLink}>Send another</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TextInput
+              style={contactStyles.input}
+              placeholder="Your name"
+              placeholderTextColor={theme.colors.textMuted}
+              value={name}
+              onChangeText={setName}
+              testID="contact-name"
+            />
+            <TextInput
+              style={contactStyles.input}
+              placeholder="Email"
+              placeholderTextColor={theme.colors.textMuted}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              testID="contact-email"
+            />
+            <TextInput
+              style={contactStyles.input}
+              placeholder="Phone (optional)"
+              placeholderTextColor={theme.colors.textMuted}
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              testID="contact-phone"
+            />
+            <TextInput
+              style={contactStyles.input}
+              placeholder="Subject (optional)"
+              placeholderTextColor={theme.colors.textMuted}
+              value={subject}
+              onChangeText={setSubject}
+              testID="contact-subject"
+            />
+            <TextInput
+              style={[contactStyles.input, { minHeight: 90, textAlignVertical: 'top' }]}
+              placeholder="Your message"
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              value={message}
+              onChangeText={setMessage}
+              testID="contact-message"
+            />
+            <TouchableOpacity
+              style={[contactStyles.submit, sending && { opacity: 0.6 }]}
+              onPress={submit}
+              disabled={sending || !name || !email || !message}
+              testID="contact-submit"
+            >
+              <Text style={contactStyles.submitText}>{sending ? 'Sending…' : 'Send Message'}</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const contactStyles = StyleSheet.create({
+  section: { marginTop: 32, paddingHorizontal: 24, gap: 14 },
+  head: { gap: 4 },
+  label: { color: theme.colors.primary, fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', fontWeight: '700' },
+  title: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
+  form: { backgroundColor: theme.colors.surface, padding: 18, borderRadius: 4, borderWidth: 1, borderColor: theme.colors.border, gap: 10 },
+  input: { backgroundColor: theme.colors.background, borderWidth: 1, borderColor: theme.colors.border, color: theme.colors.text, padding: 12, borderRadius: 4, fontSize: 14 },
+  submit: { backgroundColor: theme.colors.primary, padding: 14, borderRadius: 4, alignItems: 'center' },
+  submitText: { color: theme.colors.background, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', fontSize: 13 },
+  sentBox: { alignItems: 'center', gap: 8, paddingVertical: 12 },
+  sentText: { color: theme.colors.text, fontSize: 15, fontWeight: '600' },
+  sentLink: { color: theme.colors.primary, fontWeight: '700' },
+});
 
 function Section({
   label,

@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration 2 — Admin panel + public SEO website end-to-end tested. Backend: 17/17 new pytest cases pass (100%) covering public inquiries (POST /api/inquiries no-auth), public quote (POST /api/quotes/public no-auth, user_id='guest'), quote estimate, admin gating (401 no-token, 403 customer-token on /api/admin/*), admin stats (all 7 KPI keys), admin quote status update + delete (Create→PUT→GET→DELETE→GET), admin inquiry reply + delete, full CRUD on menu/services/portfolio/testimonials/corporate-clients (POST→PUT→GET-verify→DELETE), and admin media upload (data URL accepted, non-data URL → 400, GET /api/media/{id} returns the same data_url). Combined with iteration_1's 19 tests, total backend coverage: 36/36 passing. Frontend (web, viewport 1400x900): public website renders end-to-end — SEO titles correct on / and /about ('Cosmic Bites — Pure Vegetarian Catering for Birthdays, Corporate & Weddings' and 'About Cosmic Bites — Pure Vegetarian Catering Story'), hero + CTA + corporate logos on /, services list with starting prices on /services, contact form submits to /api/inquiries and shows 'Message received' success, /get-quote builds live estimate (₹62,500 for 100 guest birthday default, jumps to ₹72,500 after adding Chinese cuisine) and submits to /api/quotes/public → shows 'Quote received' success screen with WhatsApp CTA. Admin login (admin@cosmicbites.com / Admin@123) redirects to /admin; Dashboard shows all KPIs (Total Quotes 4→5 after public submit, Pending, Customers, New Queries, Menu Items 26, Portfolio 8, Pipeline Value ₹1,97,550). Sidebar has 8 nav items. /admin/quotes lists all submitted quotes (including freshly-submitted TEST UI Guest from /get-quote) with status filters; /admin/inquiries lists submitted contact messages; /admin/menu and /admin/portfolio list seeded items with NEW button. Non-admin visiting /admin is redirected away from admin (lands on /auth/login).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "passlib/bcrypt startup log", "issue": "Cosmetic WARN 'module bcrypt has no attribute __about__' on startup — hashing/verify still work; unchanged from iteration 1."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/ (home) TRUSTED BY section", "issues": ["Corporate client logos render as plain orange-filled tiles with text labels below (Kotak/Barclays/Network18). The seeded LOGO_1/2/3 image URLs appear to be solid color blocks rather than real brand logos — purely a seed-data/asset quality issue, not a functional bug."]},
+      {"screen": "global (web preview)", "issues": ["React-Native-Web deprecation WARN: 'props.pointerEvents is deprecated. Use style.pointerEvents' and 'Image: style.tintColor is deprecated. Please use props.tintColor.' — cosmetic, no functional impact."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_cosmic_bites.py",
+    "/app/backend/tests/test_admin_and_public.py",
+    "/app/test_reports/pytest/iter2_admin_public.xml"
+  ],
+  "action_items": [
+    "(Optional, low-priority) Replace seeded corporate client logos (LOGO_1/2/3) with real brand assets (Kotak/Barclays/Network18) — current ones appear as flat colored tiles.",
+    "(Optional behavioral note) Non-admin /admin redirect currently lands on /auth/login. Spec mentions /home. Consider tightening: if user is logged in (token valid) but role != admin, redirect to /home; if no/invalid token, keep /auth/login redirect. Either way, customer cannot access admin content — verified."
+  ],
+  "critical_code_review_comments": [
+    "server.py — admin role gating uses a clean Depends chain (require_admin → get_current_user → bearer); returns 401 on missing token, 403 on wrong role. Verified by tests.",
+    "POST /api/quotes/public correctly persists with user_id='guest' and exposes the contact details on the quote document — admin can see and manage these.",
+    "POST /api/admin/media validates data: URL prefix and enforces ~2MB cap (413) — good defensive limits.",
+    "All admin CRUD endpoints use UUID ids, exclude Mongo _id on read, and re-read after update for response — clean.",
+    "Frontend /get-quote testIDs are exhaustive (q-event-*, q-cuisine-*, q-service-*, q-live-*, q-contact-*, q-submit) — excellent testability.",
+    "SEO titles set per-route via the use-seo hook; verified document.title flips correctly on /, /about (other public routes likely also covered).",
+    "Public quote success screen exposes WhatsApp CTA + recap of ₹/plate × guests — matches PRD."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_and_public.py (created — 17 tests covering iteration-2 surface)",
+    "/app/test_reports/iteration_2.json (this report)",
+    "/app/test_reports/pytest/iter2_admin_public.xml (JUnit XML)"
+  ],
+  "success_rate": {"backend": "100% (17/17 new + 19/19 prior = 36/36)", "frontend": "100% — public site (home/about/services/contact/get-quote), admin login → /admin, dashboard KPIs, /admin/quotes (status badges), /admin/inquiries, /admin/menu, /admin/portfolio, non-admin redirect away from /admin all verified"},
+  "seed_data_creation": "Created via tests/UI runs (auto-prefixed TEST_): public inquiries 'TEST Inquirer' & 'TEST UI Contact'; public quotes 'TEST UI Guest', 'TEST Guest', plus customer-authored quotes from iteration 1. Admin auto-seeded. All ephemeral test resources for CRUD (menu/service/portfolio/testimonial/client) were created and DELETEd within their tests — no residue.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "EXPO_PUBLIC_BACKEND_URL=https://cosmic-events-6.preview.emergentagent.com. Admin: admin@cosmicbites.com / Admin@123 (seeded at startup). Run all backend tests: pytest /app/backend/tests/ -v. Frontend testIDs of note — login: login-email-input, login-password-input, login-submit-btn; site shell: site-brand, site-nav-{home|about|services|contact}, site-signin, site-cta-quote; get-quote: q-event-{type}, q-guests, q-date, q-location, q-cuisine-{c}, q-service-{s}, q-live-{c}, q-staff, q-decor, q-notes, q-contact-{name|email|phone}, q-submit. Public quote success screen shows WhatsApp CTA. Admin dashboard URL: /admin (web ≥900px sidebar). Non-admin /admin → /auth/login (not /home — minor spec deviation, see action_items).",
+  "rca_of_issue": "No blocking issues. One spec-vs-impl nuance: non-admin /admin redirect goes to /auth/login (intended for unauthenticated). When testing with a valid customer token in localStorage but role=customer, the layout still bounces to /auth/login. Likely cause: admin _layout.tsx checks `user?.role === 'admin'` but redirects to login when `!user` is true (i.e., before /auth/me re-hydrates from token). Mitigation: in admin layout, distinguish (a) no token → /auth/login (b) token + role!=admin → /home. Non-blocking — admin content is not exposed in either case."
+}

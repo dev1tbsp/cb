@@ -164,6 +164,18 @@ export default function Profile() {
             <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
           </TouchableOpacity>
 
+          {user.role === 'admin' && (
+            <TouchableOpacity
+              style={[styles.contactRow, { borderColor: theme.colors.primary }]}
+              onPress={() => router.push('/admin')}
+              testID="profile-open-admin"
+            >
+              <Ionicons name="construct" size={20} color={theme.colors.primary} />
+              <Text style={[styles.contactText, { color: theme.colors.primary }]}>Open Admin Console</Text>
+              <Ionicons name="chevron-forward" size={18} color={theme.colors.primary} />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity style={styles.logoutBtn} onPress={doLogout} testID="profile-logout-btn">
             <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
             <Text style={styles.logoutText}>Sign out</Text>
