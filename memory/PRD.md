@@ -1,32 +1,61 @@
-# Cosmic Bites — Product Requirements (v1 MVP)
+# Cosmic Bites — Product Requirements
 
 ## What this is
-A premium **pure-vegetarian catering** mobile app (Expo + FastAPI + MongoDB) for India's
-celebration market — birthdays, house parties, housewarming, pre-wedding, corporate, festive.
-Caters 20–500 guests. Customer-facing app focused on **lead capture → instant quote → handoff to WhatsApp**.
+A premium **pure-vegetarian catering** business platform built on a single backend (FastAPI + MongoDB) with three frontends served from the same Expo Router project:
+1. **Public SEO-friendly website** (`/`, `/about`, `/services`, `/contact`, `/get-quote`)
+2. **Customer mobile app** (`/home`, `/menu`, `/quote`, `/portfolio`, `/profile`) — auth-gated
+3. **Web-based admin console** (`/admin/*`) — admin-role gated
 
-## V1 scope (shipped)
-- **Auth**: Email + password registration & login (JWT, 7-day expiry, bcrypt). Admin user seeded.
-- **Home**: Premium dark luxury theme (saffron + emerald + plum). Hero with tagline & 3 CTAs (Quote, Menus, Consultation). Event categories grid, signature dishes carousel, live counter showcase, 4-step process, portfolio teaser, testimonials carousel, corporate client logos, WhatsApp/Call CTAs.
-- **Services**: 8 catering service cards (Birthday, House Party, Housewarming, Pre-Wedding, Corporate, Festive, Live Counter, Bulk Meal) with starting prices.
-- **Menus**: 10 categorized cuisines (North Indian, South Indian, Chinese, Italian, Chaat, Snacks, Desserts, Mocktails, Kids Menu, Jain Menu) with veg/jain/spice/live counter badges and per-plate pricing.
-- **Instant Quote Builder**: 6-step flow (Event → Guests → Cuisines → Services → Extras → Summary) with live pricing engine (base + cuisine premiums + service multiplier + live counter add-ons + staff/decor extras), inquiry submission, WhatsApp follow-up.
-- **Portfolio**: Bento-style gallery with event-type filters and case-study detail view (8 sample events including 150 Pax Corporate, Terrace Birthday, Engagement Function).
-- **Profile**: Edit name/phone/DoB/anniversary/address. View submitted quotes with status.
-- **Engagement**: WhatsApp + Call CTAs throughout (top bar, hero, contact block, profile, success screen).
+Caters birthdays, house parties, housewarmings, pre-wedding events, corporate events and festive celebrations. Min 20–500 guests.
+
+---
+
+## v1 — Mobile customer app + JWT auth (shipped)
+- Email + password registration & login (bcrypt, 7-day JWT)
+- 6-step Instant Quote Builder with live pricing engine
+- Categorized menus (10 cuisines, veg/jain/spice/live-counter badges)
+- Bento-style portfolio with filters and case study detail
+- Profile with DoB, anniversary, address, kids; My-Quotes history
+- WhatsApp + Call CTAs throughout
+- Premium dark luxury design (saffron + emerald + plum)
+
+## v2 — Admin console (shipped)
+- Web-optimised admin shell with role guard + responsive sidebar
+- Dashboard with 7 KPIs (total quotes, pending, customers, menu items, portfolio, new inquiries, pipeline value)
+- **Quotes management**: filter by status, view details, change status (pending/contacted/confirmed/cancelled), WhatsApp customer, call customer, delete
+- **Queries/Inquiries**: list, reply (saves note + marks replied/resolved), email customer, delete
+- **Generic CRUD** for Menu / Services / Portfolio / Testimonials / Corporate Clients with shared `CrudList` component
+- **Media upload**: web file picker → base64 → stored in MongoDB → reusable as image URL or paste an external URL
+
+## v3 — Public SEO website (shipped)
+- Home (`/`): hero with tagline + 3 CTAs (Get Quote, WhatsApp, Sign In), event categories grid, corporate trust strip, about teaser, services grid, signature dishes carousel, 4-step process, portfolio teaser, testimonials, CTA band, full footer
+- About (`/about`): story, 4 value pillars (Pure Vegetarian, Hygiene First, Fresh Ingredients, Multi-Event Mastery), milestones timeline
+- Services (`/services`): all 8 catering packages with starting prices and features
+- Contact (`/contact`): info cards (Call, WhatsApp, Email, Instagram) + message form
+- Get Quote (`/get-quote`): public quote builder with live estimate and contact form — **no signup required**
+- **SEO**: `document.title` + `<meta name="description">` + Open Graph tags per page
+- Sticky top nav (Home / About / Services / Contact + Sign In + Get Quote)
+- Responsive: 412px mobile → 1400px desktop
+
+## Backend endpoint inventory
+**Public** (no auth): `/api/event-categories`, `/api/services`, `/api/menu`, `/api/portfolio`, `/api/testimonials`, `/api/corporate-clients`, `/api/inquiries` (POST), `/api/quotes/estimate`, `/api/quotes/public`, `/api/media/{id}`
+
+**Customer** (JWT): `/api/auth/*`, `/api/quotes` (POST + GET my)
+
+**Admin** (admin role): `/api/admin/stats`, `/api/admin/quotes/*`, `/api/admin/inquiries/*`, `/api/admin/menu/*`, `/api/admin/services/*`, `/api/admin/portfolio/*`, `/api/admin/testimonials/*`, `/api/admin/corporate-clients/*`, `/api/admin/media`
 
 ## Tech
-- **Backend**: FastAPI, Motor (MongoDB async), passlib/bcrypt, python-jose JWT, idempotent seeding on startup (admin + 6 categories + 8 services + 26 menu items + 8 portfolio + 5 testimonials + 3 logos).
-- **Frontend**: Expo Router file-based routing, React Native components only, `@/src/utils/storage` for tokens, `@expo/vector-icons` for icons, fetch-based client.
-- **Design**: Luxury dark theme (#0B1511 bg, #E6B04D primary), data-testid on all interactive elements.
+- **Backend**: FastAPI, Motor (MongoDB async), passlib/bcrypt, python-jose JWT, idempotent seeding on startup
+- **Frontend**: Expo Router (web + native), React Native components only, fetch-based client, `@/src/utils/storage` for tokens, Ionicons
+- **36/36 backend pytest** pass · all frontend flows verified end-to-end
 
-## Future roadmap (not in v1)
-- Payment gateway (Razorpay/Stripe) for advance booking
-- Push notifications (festival packages, follow-ups)
-- Loyalty points & reorder for corporate clients
-- Community: recipe sharing, pre-book small-batch
-- Blog/feed: DIY ideas, festival recipes
-- Web-based admin panel for media upload, package editing, quote management
+## Future roadmap (not in v3)
+- Razorpay token-amount payment
+- Push notifications, loyalty points, reorder
+- Community feed (recipes, pre-book small-batch), blog
+- Google Maps embed on contact, Instagram feed embed
+- Replace stub corporate logo placeholders with real brand SVGs
+- Server-side rendering for SEO snippets / sitemap.xml
 
 ## Business growth lever
-**WhatsApp handoff after every quote**: The success screen routes leads directly to a pre-filled WhatsApp message with Quote ID, dramatically increasing sales-conversation conversion vs. email-only inquiries — critical for the Indian catering market where most deals close on chat.
+**Three funnels, one backend**: SEO website attracts organic search → public Quote / Inquiry forms capture leads → admin manages the funnel with one-click WhatsApp follow-up. Customer mobile app handles repeat business with logged-in quotes & history. Designed for the Indian catering market where most deals close on WhatsApp chat.
