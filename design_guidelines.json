@@ -1,0 +1,102 @@
+{
+  "theme": "dark",
+  "archetype": "Luxury (Archetype 5) with Organic/Earthy Indian Tones",
+  "vibe": "Premium, Bold, Elegant, Colorful, Celebratory",
+  "typography": {
+    "heading_font": "Playfair Display",
+    "body_font": "Outfit",
+    "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none font-bold",
+    "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-none font-semibold",
+    "h3": "text-xl sm:text-2xl font-medium",
+    "body": "text-base leading-relaxed text-[#FAF7F2]/80",
+    "labels": "text-xs tracking-[0.2em] uppercase font-bold text-[#E6B04D]"
+  },
+  "colors": {
+    "background": "#0B1511",
+    "surface": "#121E18",
+    "surface_glass": "rgba(18, 30, 24, 0.7)",
+    "primary": "#E6B04D",
+    "primary_hover": "#F4C674",
+    "text_main": "#FAF7F2",
+    "text_muted": "#A3B3AA",
+    "accent_plum": "#5D2E46",
+    "accent_emerald": "#043B2A",
+    "accent_marigold": "#F29C38",
+    "border": "rgba(230, 176, 77, 0.2)"
+  },
+  "spacing_and_layout": {
+    "container_padding": "p-6 sm:p-8 lg:p-12",
+    "section_gap": "gap-16 sm:gap-24",
+    "grid_strategy": "Bento Grid (Tetris Mode) for Portfolio, Control Room Grid for Menu/Services",
+    "border_radius": "rounded-sm",
+    "glassmorphism": "backdrop-blur-xl bg-[#121E18]/70 border border-[#E6B04D]/20 shadow-xl"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#E6B04D] text-[#0B1511] font-bold uppercase tracking-wider rounded-sm hover:bg-[#F4C674] transition-all px-8 py-4",
+      "secondary": "bg-transparent border border-[#E6B04D] text-[#E6B04D] font-bold uppercase tracking-wider rounded-sm hover:bg-[#E6B04D]/10 transition-all px-8 py-4",
+      "ghost": "text-[#E6B04D] hover:text-[#F4C674] font-medium"
+    },
+    "cards": {
+      "default": "bg-[#121E18] border border-[#E6B04D]/10 p-6 rounded-sm hover:-translate-y-1 hover:border-[#E6B04D]/30 transition-all shadow-lg"
+    },
+    "inputs": {
+      "default": "bg-[#0B1511] border border-[#E6B04D]/20 text-[#FAF7F2] rounded-sm focus:border-[#E6B04D] focus:ring-1 focus:ring-[#E6B04D]"
+    },
+    "tags": {
+      "veg": "bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-1 text-xs rounded-sm",
+      "spicy": "bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-1 text-xs rounded-sm",
+      "live_counter": "bg-[#E6B04D]/10 text-[#E6B04D] border border-[#E6B04D]/20 px-2 py-1 text-xs rounded-sm uppercase tracking-wider"
+    }
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "stroke-[1.5] text-[#E6B04D]"
+  },
+  "motion": {
+    "hover": "transition-transform duration-300 ease-out",
+    "page_transition": "framer-motion opacity and slight translateY"
+  },
+  "images": {
+    "hero_feast": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/0bec547c94a8a1c6b5cc1c49d641ea25b1b5d44d4c0b0d4340bcb5f081bf8a1d.png",
+      "description": "Close-up of a premium Indian vegetarian feast in copper bowls, rich dark moody lighting, saffron threads, vibrant marigold petals on a dark textured wooden table."
+    },
+    "live_counter": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/cb48ccb579fd6d36baeaff403d662ac1e76e09f70a73ce51f5e08d5df20b709d.png",
+      "description": "Elegant outdoor chaat and street food live counter at an evening Indian pre-wedding function, warm glowing ambient string lights."
+    },
+    "corporate_setup": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/a195994895d680a9168a969cbd37b0a4f60d66a9b0f077572e033b02958c3645.png",
+      "description": "Luxury corporate catering buffet setup, symmetrical modern layout, elegant silver chafing dishes on black marble tables."
+    },
+    "signature_dishes": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/c2969cd9807f501ea73d9328149a8bdd4d3e6d697e5b1f97d5d079a1e3b0944b.png",
+      "description": "Overhead shot of an elegant thali with vibrant North and South Indian vegetarian dishes, rich saffron, deep red curries."
+    },
+    "corporate_logo_1": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/fba74551cde17fb68586e9b8da332fd4af8cfc544dcaf617142e905de9f39192.png",
+      "description": "Minimalist abstract geometric corporate logo, white lines on pure black background"
+    },
+    "corporate_logo_2": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/8f908833e6c33133337f849a571610e6bb3e6adbe78926e6c741d02238642ffa.png",
+      "description": "Elegant typography corporate logo, abstract monogram, white on pure black background"
+    },
+    "corporate_logo_3": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/3098d21af42a8405075d6135f2d6d3705b862bee417192700c320dfa52f2c926.png",
+      "description": "Modern corporate logo, sleek abstract shape, white on pure black background"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Ensure all fonts are imported via Google Fonts (Playfair Display and Outfit).",
+    "Avoid generic Tailwind styles. Use pure HTML + Tailwind for all layout containers. Only use Shadcn for complex inputs, select, forms.",
+    "Do NOT use pure white or pure black. Use #FAF7F2 for white and #0B1511 for black.",
+    "For Hero section, use 'hero_feast' image with a bg-gradient-to-r from-[#0B1511]/90 via-[#0B1511]/60 to-transparent overlay so text remains highly readable.",
+    "Include data-testid on ALL interactive and key informational elements. Kebab-case, role-based naming (e.g. data-testid='hero-cta-quote').",
+    "Create a multi-step form for Instant Quote Builder using state (event -> count -> cuisine -> services -> live counters).",
+    "For images, apply a dark theme filter if necessary or use inner shadow to blend them into the dark UI.",
+    "Do not build a hamburger menu on desktop. Build proper navigation links.",
+    "Do not use card components blindly for marketing page. Build pure HTML/CSS bento grid for Portfolio.",
+    "App must be fully responsive, focusing heavily on mobile UI, since it's a mobile web app."
+  ]
+}
