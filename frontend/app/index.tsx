@@ -1,16 +1,31 @@
-import { Text, View, StyleSheet, Image } from "react-native";
-
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet, Text, Image } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/src/context/AuthContext';
+import { theme, BUSINESS } from '@/src/theme';
 
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        router.replace('/home');
+      } else {
+        router.replace('/auth/login');
+      }
+    }
+  }, [user, loading, router]);
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
+    <View style={styles.container} testID="splash-screen">
+      <View style={styles.brand}>
+        <Text style={styles.logoMark}>✦</Text>
+        <Text style={styles.brandName}>{BUSINESS.name}</Text>
+        <Text style={styles.brandTag}>{BUSINESS.tagline}</Text>
+      </View>
+      <ActivityIndicator color={theme.colors.primary} size="large" />
     </View>
   );
 }
@@ -18,13 +33,24 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 32,
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  brand: { alignItems: 'center', gap: 8 },
+  logoMark: { color: theme.colors.primary, fontSize: 48, letterSpacing: 2 },
+  brandName: {
+    color: theme.colors.text,
+    fontSize: 36,
+    letterSpacing: 4,
+    fontWeight: '700',
+  },
+  brandTag: {
+    color: theme.colors.primary,
+    fontSize: 11,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    marginTop: 4,
   },
 });
