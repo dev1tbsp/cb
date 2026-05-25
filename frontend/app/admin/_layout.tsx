@@ -46,12 +46,6 @@ export default function AdminLayout() {
       </View>
     );
   }
-    return (
-      <View style={[styles.shell, { alignItems: 'center', justifyContent: 'center' }]}>
-        <Text style={{ color: theme.colors.textMuted }}>Checking access…</Text>
-      </View>
-    );
-  }
 
   const doLogout = async () => {
     await logout();
