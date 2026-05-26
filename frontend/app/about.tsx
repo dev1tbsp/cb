@@ -1,134 +1,135 @@
-import { View, Text, ScrollView, StyleSheet, Image, useWindowDimensions, TouchableOpacity, Linking } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, Image, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme, BUSINESS } from '@/src/theme';
-import { useSeo } from '@/src/hooks/use-seo';
-import { SiteHeader, SiteFooter } from '@/src/components/SiteShell';
+import { PageShell } from '@/src/components/PageShell';
+import { theme } from '@/src/theme';
+import { useSeo } from '@/src/hooks/useSeo';
 
-const HERO_IMG = 'https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/c2969cd9807f501ea73d9328149a8bdd4d3e6d697e5b1f97d5d079a1e3b0944b.png';
+const HERO = 'https://static.prod-images.emergentagent.com/jobs/c2086a8e-9ca7-4684-a00f-3d11ee3410f9/images/c2969cd9807f501ea73d9328149a8bdd4d3e6d697e5b1f97d5d079a1e3b0944b.png';
 
 const VALUES = [
-  { icon: 'leaf', title: 'Pure Vegetarian', desc: '100% vegetarian — always. No exceptions, no compromises.' },
-  { icon: 'sparkles', title: 'Hygiene First', desc: 'FSSAI-licensed kitchens, audited regularly, on-site sanitation.' },
-  { icon: 'flame', title: 'Fresh Ingredients', desc: 'Sourced daily from trusted local vendors and prepped on-site.' },
-  { icon: 'people', title: 'Multi-Event Mastery', desc: 'From intimate 20-pax dinners to 500-pax wedding spreads.' },
+  { icon: 'leaf', title: 'Pure Vegetarian', desc: 'Our kitchens have never served non-vegetarian food. Trusted by Jain & Hindu families across India.' },
+  { icon: 'sparkles', title: 'Hygiene First', desc: 'FSSAI compliant, ISO-audited kitchens. Daily temperature logs, staff health screenings, sealed transport.' },
+  { icon: 'restaurant', title: 'Fresh Ingredients', desc: 'Sourced daily from trusted vendors. No frozen produce, no shortcuts — just authentic flavours.' },
+  { icon: 'people', title: 'Multi-Event Mastery', desc: 'From a 20-pax birthday to a 500-pax corporate gala, our team scales seamlessly with you.' },
 ];
 
 const MILESTONES = [
-  { year: '2018', text: 'Cosmic Bites founded as a boutique caterer for house parties.' },
-  { year: '2019', text: 'First corporate client onboarded; expanded to live counters.' },
-  { year: '2021', text: 'Crossed 100 events catered; introduced festive packages.' },
-  { year: '2023', text: 'Trusted partner for Kotak, Barclays, Network18 daily catering.' },
-  { year: '2025', text: 'Launched mobile app for instant quotes and reorders.' },
+  { year: '2014', event: 'Cosmic Bites founded in Mumbai with a single ambition — elevate pure-vegetarian catering.' },
+  { year: '2016', event: 'First corporate client: Kotak. Daily lunch service kicks off.' },
+  { year: '2019', event: 'Expanded to live-counter catering. Pasta, dosa & tandoor stations debut.' },
+  { year: '2022', event: 'Crossed 500 events. Partnered with Barclays and Network18.' },
+  { year: '2024', event: 'Launched our digital quote builder and admin console.' },
 ];
 
 export default function AboutPage() {
-  const router = useRouter();
   const { width } = useWindowDimensions();
-  const isWide = width >= 900;
+  const isWide = width >= 880;
 
   useSeo({
-    title: 'About Cosmic Bites — Pure Vegetarian Catering Story',
-    description:
-      'Cosmic Bites is a premium pure-vegetarian catering brand serving birthdays, corporate, weddings and festive events. Hygienic, fresh, multi-cuisine.',
+    title: 'About Us — Cosmic Bites Catering',
+    description: 'Founded in 2014, Cosmic Bites is a premium pure-vegetarian catering brand trusted by Kotak, Barclays, Network18 and 500+ events.',
   });
 
   return (
-    <ScrollView style={styles.page}>
-      <SiteHeader />
-
-      <View style={[styles.head, isWide && { paddingHorizontal: 48 }]}>
-        <Text style={styles.eyebrow}>About us</Text>
-        <Text style={[styles.title, isWide && { fontSize: 56 }]}>The story of Cosmic Bites</Text>
-        <Text style={styles.lede}>
-          We exist to prove that vegetarian food can be the most celebrated part of any event.
-          Every dish is crafted with respect, every plate served with care.
-        </Text>
+    <PageShell>
+      {/* Hero */}
+      <View style={[s.hero, isWide && s.heroWide]}>
+        <View style={[s.heroText, isWide && { flex: 1, paddingRight: 32 }]}>
+          <Text style={s.eyebrow}>Our Story</Text>
+          <Text style={[s.title, isWide && { fontSize: 48 }]}>A decade of pure-veg craft</Text>
+          <Text style={s.body}>Cosmic Bites began in 2014 as a passion project — two friends from Mumbai who believed that vegetarian food deserved to be the highlight of every celebration, not an afterthought.</Text>
+          <Text style={s.body}>Today, we cater 500+ events a year across birthdays, corporate galas, pre-wedding functions, festive feasts and intimate house parties. We've earned the trust of brands like Kotak, Barclays and Network18 — and more importantly, of hundreds of families who keep coming back.</Text>
+        </View>
+        <Image source={{ uri: HERO }} style={[s.heroImg, isWide && { flex: 1, height: 480 }]} />
       </View>
 
-      <Image source={{ uri: HERO_IMG }} style={[styles.cover, isWide && styles.coverWide]} />
-
-      <View style={[styles.section, isWide && styles.sectionWide]}>
-        <Text style={styles.h2}>Our promise</Text>
-        <Text style={styles.body}>
-          Cosmic Bites was born in 2018 with a singular mission — to make pure-vegetarian catering
-          feel premium, joyful and unmistakably ours. From small house parties to 500-guest galas,
-          we treat every event as if it were our own celebration. Our chefs craft menus drawn from
-          ten cuisines including North Indian, South Indian, Italian, Chinese, Chaat, Snacks,
-          Desserts, Mocktails, Kids and Jain — all 100% vegetarian.
-        </Text>
-      </View>
-
-      <View style={[styles.values, isWide && styles.valuesWide]}>
-        {VALUES.map((v) => (
-          <View key={v.title} style={[styles.valueCard, isWide && { flex: 1 }]}>
-            <View style={styles.valueIcon}>
-              <Ionicons name={v.icon as any} size={20} color={theme.colors.primary} />
-            </View>
-            <Text style={styles.valueTitle}>{v.title}</Text>
-            <Text style={styles.valueDesc}>{v.desc}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={[styles.section, isWide && styles.sectionWide]}>
-        <Text style={styles.h2}>Milestones</Text>
-        <View style={styles.timeline}>
-          {MILESTONES.map((m) => (
-            <View key={m.year} style={styles.timelineItem}>
-              <View style={styles.timelineDot} />
-              <Text style={styles.timelineYear}>{m.year}</Text>
-              <Text style={styles.timelineText}>{m.text}</Text>
+      {/* Values */}
+      <View style={[s.section, isWide && { paddingHorizontal: 56 }]}>
+        <Text style={s.sectionEyebrow}>What we stand for</Text>
+        <Text style={[s.sectionTitle, isWide && { fontSize: 36 }]}>Our promise to you</Text>
+        <View style={[s.valuesGrid, isWide && s.valuesGridWide]}>
+          {VALUES.map((v) => (
+            <View key={v.title} style={[s.valueCard, isWide && { width: '48%' }]}>
+              <View style={s.valueIcon}><Ionicons name={v.icon as any} size={20} color={theme.colors.primary} /></View>
+              <Text style={s.valueTitle}>{v.title}</Text>
+              <Text style={s.valueDesc}>{v.desc}</Text>
             </View>
           ))}
         </View>
       </View>
 
-      <View style={[styles.ctaBlock, isWide && { padding: 48 }]}>
-        <Text style={styles.ctaTitle}>Ready to celebrate with us?</Text>
-        <View style={{ flexDirection: 'row', gap: 10, marginTop: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <TouchableOpacity style={styles.ctaPrimary} onPress={() => router.push('/get-quote')} testID="about-cta-quote">
-            <Text style={styles.ctaPrimaryText}>Get Instant Quote</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.ctaSecondary} onPress={() => Linking.openURL(`https://wa.me/${BUSINESS.whatsapp}`)} testID="about-cta-whatsapp">
-            <Ionicons name="logo-whatsapp" size={16} color={theme.colors.primary} />
-            <Text style={styles.ctaSecondaryText}>WhatsApp Us</Text>
-          </TouchableOpacity>
+      {/* Milestones */}
+      <View style={[s.section, isWide && { paddingHorizontal: 56 }]}>
+        <Text style={s.sectionEyebrow}>Our journey</Text>
+        <Text style={[s.sectionTitle, isWide && { fontSize: 36 }]}>Milestones</Text>
+        <View style={s.timeline}>
+          {MILESTONES.map((m, i) => (
+            <View key={m.year} style={s.mileRow}>
+              <View style={s.mileLeft}>
+                <View style={s.dot} />
+                {i < MILESTONES.length - 1 && <View style={s.line} />}
+              </View>
+              <View style={s.mileBody}>
+                <Text style={s.mileYear}>{m.year}</Text>
+                <Text style={s.mileText}>{m.event}</Text>
+              </View>
+            </View>
+          ))}
         </View>
       </View>
 
-      <SiteFooter />
-    </ScrollView>
+      {/* Stats */}
+      <View style={[s.statsBand, isWide && { padding: 56, flexDirection: 'row' }]}>
+        <Stat value="500+" label="Events catered" />
+        <Stat value="100%" label="Pure vegetarian" />
+        <Stat value="10+" label="Cuisines mastered" />
+        <Stat value="10y" label="Of catering craft" />
+      </View>
+    </PageShell>
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: theme.colors.background },
-  head: { padding: 24, paddingTop: 48, gap: 10 },
+function Stat({ value, label }: any) {
+  return (
+    <View style={s.statBox}>
+      <Text style={s.statVal}>{value}</Text>
+      <Text style={s.statLbl}>{label}</Text>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  hero: { padding: 24, paddingTop: 48, gap: 24 },
+  heroWide: { flexDirection: 'row', padding: 56, paddingTop: 80, alignItems: 'center' },
+  heroText: { gap: 14 },
   eyebrow: { color: theme.colors.primary, fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', fontWeight: '700' },
-  title: { color: theme.colors.text, fontSize: 36, fontWeight: '700', lineHeight: 42 },
-  lede: { color: theme.colors.textMuted, fontSize: 16, lineHeight: 24, maxWidth: 720 },
-  cover: { width: '100%', height: 280 },
-  coverWide: { height: 480 },
-  section: { padding: 24, paddingVertical: 36, gap: 14 },
-  sectionWide: { paddingHorizontal: 48, paddingVertical: 56 },
-  h2: { color: theme.colors.text, fontSize: 26, fontWeight: '700' },
-  body: { color: theme.colors.text, fontSize: 15, lineHeight: 25, opacity: 0.88 },
-  values: { padding: 24, flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  valuesWide: { paddingHorizontal: 48, gap: 18 },
-  valueCard: { width: '100%', backgroundColor: theme.colors.surface, padding: 20, borderRadius: 4, borderWidth: 1, borderColor: theme.colors.border, gap: 10 },
-  valueIcon: { width: 44, height: 44, borderRadius: 4, backgroundColor: 'rgba(230,176,77,0.15)', alignItems: 'center', justifyContent: 'center' },
-  valueTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
-  valueDesc: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 20 },
-  timeline: { gap: 16, marginTop: 12 },
-  timelineItem: { flexDirection: 'row', gap: 14, alignItems: 'flex-start' },
-  timelineDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: theme.colors.primary, marginTop: 8 },
-  timelineYear: { color: theme.colors.primary, fontWeight: '700', fontSize: 14, width: 50 },
-  timelineText: { color: theme.colors.text, fontSize: 14, flex: 1, lineHeight: 21 },
-  ctaBlock: { backgroundColor: theme.colors.surface, padding: 32, alignItems: 'center', gap: 10, borderTopWidth: 1, borderTopColor: theme.colors.border, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
-  ctaTitle: { color: theme.colors.text, fontSize: 24, fontWeight: '700', textAlign: 'center' },
-  ctaPrimary: { backgroundColor: theme.colors.primary, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 4 },
-  ctaPrimaryText: { color: theme.colors.background, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', fontSize: 13 },
-  ctaSecondary: { flexDirection: 'row', gap: 8, alignItems: 'center', borderWidth: 1, borderColor: theme.colors.primary, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 4 },
-  ctaSecondaryText: { color: theme.colors.primary, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', fontSize: 13 },
+  title: { color: theme.colors.text, fontSize: 36, fontWeight: '700' },
+  body: { color: theme.colors.text, fontSize: 15, lineHeight: 24, opacity: 0.9 },
+  heroImg: { width: '100%', height: 280, borderRadius: 6 },
+
+  section: { padding: 24, gap: 16, paddingVertical: 48 },
+  sectionEyebrow: { color: theme.colors.primary, fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', fontWeight: '700' },
+  sectionTitle: { color: theme.colors.text, fontSize: 28, fontWeight: '700' },
+
+  valuesGrid: { gap: 14, marginTop: 12 },
+  valuesGridWide: { flexDirection: 'row', flexWrap: 'wrap', gap: '4%' as any },
+  valueCard: { backgroundColor: theme.colors.surface, padding: 20, borderRadius: 6, borderWidth: 1, borderColor: theme.colors.border, gap: 10, marginBottom: 14 },
+  valueIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(230,176,77,0.15)', alignItems: 'center', justifyContent: 'center' },
+  valueTitle: { color: theme.colors.text, fontSize: 17, fontWeight: '700' },
+  valueDesc: { color: theme.colors.textMuted, fontSize: 14, lineHeight: 21 },
+
+  timeline: { marginTop: 12 },
+  mileRow: { flexDirection: 'row', gap: 16, minHeight: 80 },
+  mileLeft: { alignItems: 'center', width: 24 },
+  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: theme.colors.primary, marginTop: 4 },
+  line: { width: 2, flex: 1, backgroundColor: theme.colors.border, marginTop: 6 },
+  mileBody: { flex: 1, paddingBottom: 18, gap: 4 },
+  mileYear: { color: theme.colors.primary, fontSize: 18, fontWeight: '700' },
+  mileText: { color: theme.colors.text, fontSize: 14, lineHeight: 21, opacity: 0.9 },
+
+  statsBand: { backgroundColor: theme.colors.surface, padding: 24, gap: 24, borderTopWidth: 1, borderTopColor: theme.colors.border, borderBottomWidth: 1, borderBottomColor: theme.colors.border, marginTop: 24 },
+  statBox: { flex: 1, alignItems: 'center', gap: 4 },
+  statVal: { color: theme.colors.primary, fontSize: 36, fontWeight: '700' },
+  statLbl: { color: theme.colors.textMuted, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase' },
 });
