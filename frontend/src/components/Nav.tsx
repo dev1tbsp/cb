@@ -42,7 +42,7 @@ export function Nav() {
                 </Pressable>
               );
             })}
-            <TouchableOpacity style={styles.ctaBtn} onPress={() => router.push('/contact')}>
+            <TouchableOpacity style={styles.ctaBtn} onPress={() => router.push('/quote')}>
               <Text style={styles.ctaBtnText}>Get a Quote</Text>
             </TouchableOpacity>
           </View>
@@ -61,7 +61,7 @@ export function Nav() {
               <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style={styles.ctaBtnMobile} onPress={() => { setOpen(false); router.push('/contact'); }}>
+          <TouchableOpacity style={styles.ctaBtnMobile} onPress={() => { setOpen(false); router.push('/quote'); }}>
             <Text style={styles.ctaBtnText}>Get a Quote</Text>
           </TouchableOpacity>
         </View>

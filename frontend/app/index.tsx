@@ -55,7 +55,7 @@ export default function Home() {
           <Text style={[s.heroTitle, isWide && { fontSize: 64, lineHeight: 72 }]}>Crafted Feasts.{'\n'}Memorable Moments.</Text>
           <Text style={s.heroSub}>From intimate house parties of 20 to corporate galas of 500 — Cosmic Bites delivers elegant, hygienic, pure-vegetarian catering across every Indian celebration.</Text>
           <View style={s.heroCtas}>
-            <Button label="Get a Quote" icon="flash" onPress={() => router.push('/contact')} testID="hero-cta-quote" />
+            <Button label="Get a Quote" icon="flash" onPress={() => router.push('/quote')} testID="hero-cta-quote" />
             <Button label="View Menu" icon="restaurant" variant="outline" onPress={() => router.push('/menu')} testID="hero-cta-menu" />
           </View>
           <View style={s.heroStats}>
@@ -204,7 +204,7 @@ export default function Home() {
         <Text style={s.ctaBandTitle}>Let's plan your event</Text>
         <Text style={s.ctaBandSub}>Tell us about your event and our team will reach out within 24 hours.</Text>
         <View style={s.ctaBandBtns}>
-          <Button label="Get a Quote" icon="flash" onPress={() => router.push('/contact')} />
+          <Button label="Get a Quote" icon="flash" onPress={() => router.push('/quote')} />
           <Button label="Browse Packages" icon="list" variant="outline" onPress={() => router.push('/packages')} />
         </View>
       </View>

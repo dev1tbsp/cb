@@ -66,7 +66,7 @@ export default function PackagesPage() {
                   </View>
                 )}
                 <View style={s.footer}>
-                  <Button label="Get a Quote" onPress={() => router.push('/contact')} icon="flash" />
+                  <Button label="Get a Quote" onPress={() => router.push('/quote')} icon="flash" />
                 </View>
               </View>
             </View>
